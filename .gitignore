@@ -1,0 +1,7 @@
+.env/
+.idea/
+transmission-lever.json
+src/__pycache__/
+src/core/__pycache__/
+src/extra/__pycache__/
+src/community/__pycache__/
