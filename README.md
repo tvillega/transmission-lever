@@ -35,7 +35,7 @@ pip3 install transmission-rpc
 
 6. Copy configuration file from example:
 ```bash
-cp transmission-lever.json.example transmission-lever.json
+cp transmission-lever.json.example ~/.config/transmission-lever.json
 ```
 
 7. Check help:
