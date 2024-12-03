@@ -10,6 +10,7 @@ from extra.category import mk_category, rm_category, enforce_categories
 from extra.tag import mk_tag, rm_tag
 from extra.tier import set_tiers, unset_tiers, activate_tiers
 from extra.tui import curses_single
+from extra.clog import set_clog, unset_clog
 
 f = open(os.path.dirname(__file__) + "/../transmission-lever.json")
 
@@ -109,6 +110,15 @@ subparser_tui.add_argument('hash',
                            type=str,
                            help='the hash of the torrent')
 
+# create the parser for the "clog" command
+subparser_clog = subparsers.add_parser('clog',
+                                       help='manages upload limit above tier bounds')
+
+subparser_clog.add_argument('action',
+                            type=str,
+                            choices=['set', 'unset'],
+                            help='action to perform')
+
 # parse arguments
 args = parser.parse_args()
 
@@ -166,3 +176,10 @@ elif args.subparser_name == 'tui':
             print('WIP')
         else:
             curses_single(cfg, args.hash)
+
+elif args.subparser_name == 'clog':
+    if args.action == 'set':
+        set_clog(cfg)
+
+    elif args.action == 'unset':
+        unset_clog(cfg)
