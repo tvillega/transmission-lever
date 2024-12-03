@@ -6,42 +6,23 @@ for others to write their own automatized tools.
 
 ## Installation
 
-This program is written in python and is platform agnostic.
-
-1. Clone the repo:
 ```bash
-git clone https://github.com/Tomodoro/transmission-lever.git tlever
+pip install transmission-lever
 ```
 
-2. Enter the repo:
+### Configuration file
+
+Running `tlever` on the same machine as the torrent program will match the default credentials,
+if that is not the case please copy the example file from the repository under one of the following paths:
+
 ```bash
-cd tlever
+1. ~/.config/transmission-lever/config.json
+2. /etc/xdg/transmission-lever/config.json
+3. ~/.transmission-lever/config.json
+4. /etc/transmission-lever/config.json
 ```
 
-3. Create an environment
-```bash
-python -m venv .env
-```
-
-4. Activate the environment
-```bash
-. .env/bin/activate
-```
-
-5. Install `transmission-rpc`:
-```bash
-pip3 install transmission-rpc
-```
-
-6. Copy configuration file from example:
-```bash
-cp transmission-lever.json.example ~/.config/transmission-lever.json
-```
-
-7. Check help:
-```bash
-python src/tlever.py --help
-```
+They will be checked in that order.
 
 ## CLI Usage
 
@@ -55,7 +36,7 @@ the transmission configuration file.
 
 For example, to move `<torrent-hash>` into the *movies* category.
 ```bash
-python src/tlever.py category add movies <torrent-hash>
+tlever category add movies <torrent-hash>
 ```
 
 This will add the label `@movies` to the torrent and move its data to:
@@ -67,7 +48,7 @@ Downloads/
 
 To undo the action:
 ```bash
-python src/tlever.py category remove movies <torrent-hash>
+tlever category remove movies <torrent-hash>
 ```
 
 This will remove the label `@movies` to the torrent and movie its data to:
@@ -85,7 +66,7 @@ Downloads/
 
 If labels get desync from the torrent directory, you can enforce the category label directory:
 ```bash
-python src/tlever.py enforce category
+tlever enforce category
 ```
 
 ### Tags
@@ -95,14 +76,14 @@ a tag with a prefix is used.
 
 For example, to tag `<torrent-hash>` with *best-of-the-year*:
 ```bash
-python src/tlever.py tag add best-of-the-year <torrent-hash>
+tlever.py tag add best-of-the-year <torrent-hash>
 ```
 
 This will add the label `#best-of-the-year` to the torrent.
 
 To undo the action:
 ```bash
-python src/tlever.py tag remove best-of-the-year <torrent-hash>
+tlever tag remove best-of-the-year <torrent-hash>
 ```
 
 This will remove the label `#best-of-the-year` to the torrent.
@@ -117,27 +98,25 @@ this is based on [qbitseedmgr](https://github.com/Tomodoro/qbitseedmgr).
 
 To start managing torrents:
 ```bash
-python src/tlever.py tier set
+tlever.py tier set
 ```
 
 To stop managing torrents:
 ```bash
-python src/tlever.py tier unset
+tlever tier unset
 ```
 
 To resume paused torrents:
 ```bash
-python src/tlever.py tier activate
+tlever.py tier activate
 ```
-
-> It seems that the RPC does not expose the number of seeds,
-> so it's not possible to port `not-popular`.
 
 To keep the tiers updated and active:
 ```bash
-python src/tlever.py enforce tier
-
+tlever enforce tier
 ```
+
+> The port of `not-popular` is a WIP.
 
 ### TUI
 
@@ -145,7 +124,7 @@ Basic terminal interface to show live a torrent stats.
 
 For example, given the torrent `<torrent-hash>`:
 ```bash
-python src/tlever.py tui show <torrent-hash>
+tlever tui show <torrent-hash>
 ```
 
 ### Labels
@@ -157,12 +136,12 @@ For example, given the prefixes `@` and `#` for categories and tags respectively
 it's desired to remove the invalid tag `%monthly-release`
 from `<torrent-hash>`:
 ```bash
-python src/tlever.py label remove %monthly-release <torrent-hash>
+tlever label remove %monthly-release <torrent-hash>
 ```
 
 To add an arbitrary label:
 ```bash
-python src/tlever.py label add custom-label <torrent-hash>
+tlever label add custom-label <torrent-hash>
 ```
 
 ## Module Usage
@@ -178,7 +157,7 @@ The functions are split into three namespaces:
 The goal is to have a friendly wrapper with proper docstrings
 that is modular and extendable.
 
-If a PR usecase is generic enough it is moved into `extra`.
+If a PR use case is generic enough it is moved into `extra`.
 
 ### How to use?
 
