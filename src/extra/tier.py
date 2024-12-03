@@ -5,7 +5,7 @@ from core.client import get_client, get_torrents_list, start_torrent
 from core.torrent import change_upload_throttle
 
 
-def upd_tier(num: str,
+def upd_tier(num: int,
              config: dict,
              torrent_hash: str
              ) -> None:
@@ -20,15 +20,17 @@ def upd_tier(num: str,
 
     client = get_client(config)
     prefix_char = config['General']['prefix']['tiers']
-    new_label = prefix_char + "tier-" + num
-    old_label = prefix_char + "tier-" + str(int(num) - 1)
+    new_label = prefix_char + "tier-" + str(num)
+    old_label = prefix_char + "tier-" + str(num - 1)
 
     sw_label(client, torrent_hash, old_label, new_label)
-    limits = config['Tiers'][num]
+    limits_array = config['Tiers']
+    limits = limits_array[num]
     change_upload_throttle(client, torrent_hash, limits)
 
 
 def set_tiers(config: dict) -> None:
+
     """
     Set bandwidth limits through tier labels
     :param config: valid configuration dictionary
@@ -37,6 +39,7 @@ def set_tiers(config: dict) -> None:
 
     client = get_client(config)
     prefix = config['General']['prefix']['tiers'] + "tier-"
+    tiers = config['Tiers']
 
     for torrent in get_torrents_list(client):
         ratio = torrent.ratio
@@ -50,22 +53,21 @@ def set_tiers(config: dict) -> None:
 
         # Maintain Tier free
         elif free:
-            limits = config['Tiers']["free"]
+            limits = config['General']["free"]
             change_upload_throttle(client, torrent_hash, limits)
 
         # Set Tier 0
-        elif ((ratio >= 0)
-              and (ratio < config["Tiers"]["0"]["seed_ratio_limit"])):
-            upd_tier("0", config, torrent_hash)
+        elif 0 <= ratio < tiers[0]["seed_ratio_limit"]:
+            upd_tier(0, config, torrent_hash)
 
-        # Set Tier 1 to max num
+        # Set Tier i
         else:
-            for i in range(1, config['General']['tiers']['number']+1):
-                new_num = str(i)
-                old_num = str(i - 1)
-                if ((ratio >= config["Tiers"][old_num]["seed_ratio_limit"])
-                        and (ratio < config["Tiers"][new_num]["seed_ratio_limit"])):
-                    upd_tier(new_num, config, torrent_hash)
+            for i in range(1, len(tiers)):
+                new_seed_ratio_limit = tiers[i]["seed_ratio_limit"]
+                old_seed_ratio_limit = tiers[i-1]["seed_ratio_limit"]
+
+                if old_seed_ratio_limit <= ratio < new_seed_ratio_limit:
+                    upd_tier(i, config, torrent_hash)
                     break
 
             else:
@@ -82,19 +84,18 @@ def unset_tiers(config: dict) -> None:
 
     client = get_client(config)
     prefix_char = config['General']['prefix']['tiers']
-    tiers_num = config['General']['tiers']['number']
-    upper_limit = tiers_num+1
+    tiers = config['Tiers']
 
     for torrent in get_torrents_list(client):
         torrent_hash = torrent.hashString
 
-        for i in range(0, upper_limit):
+        for i in range(0, len(tiers)):
             tier_label = prefix_char + "tier-" + str(i)
-            exists = find_regex_label(client, torrent_hash, tier_label)
+            exists = find_label(client, torrent_hash, tier_label)
 
             if exists:
                 rm_label(client, torrent_hash, tier_label)
-                limits = config['Tiers']["free"]
+                limits = config['General']["free"]
                 change_upload_throttle(client, torrent_hash, limits)
                 break
 
@@ -109,13 +110,12 @@ def activate_tiers(config: dict) -> None:
 
     client = get_client(config)
     prefix_char = config['General']['prefix']['tiers']
-    tiers_num = config['General']['tiers']['number']
-    upper_limit = tiers_num+1
+    tiers = config['Tiers']
 
     for torrent in get_torrents_list(client):
         torrent_hash = torrent.hashString
 
-        for i in range(0, upper_limit):
+        for i in range(0, len(tiers)):
             tier_label = prefix_char + "tier-" + str(i)
             exists = find_regex_label(client, torrent_hash, tier_label)
 
