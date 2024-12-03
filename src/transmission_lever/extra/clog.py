@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from core.client import get_client, get_torrents_list
-from core.torrent import change_upload_throttle
+from transmission_lever.core.client import get_client, get_torrents_list
+from transmission_lever.core.torrent import change_upload_throttle
 
 
 def set_clog(config: dict) -> None:

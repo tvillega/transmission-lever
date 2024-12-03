@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from core.label import mk_label, rm_label
-from core.client import get_client
+from transmission_lever.core.label import mk_label, rm_label
+from transmission_lever.core.client import get_client
 
 
 def tag_prefix(config) -> str:

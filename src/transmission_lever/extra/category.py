@@ -2,9 +2,9 @@
 
 import os
 
-from core.label import mk_label, rm_label, find_regex_label
-from core.torrent import mv_data, get_rel_download_dir
-from core.client import get_downloads_dir, get_client, get_torrents_list
+from transmission_lever.core.label import mk_label, rm_label, find_regex_label
+from transmission_lever.core.torrent import mv_data, get_rel_download_dir
+from transmission_lever.core.client import get_downloads_dir, get_client, get_torrents_list
 
 
 def category_prefix(config) -> str:
