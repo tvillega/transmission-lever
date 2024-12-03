@@ -51,7 +51,7 @@ To undo the action:
 tlever category remove movies <torrent-hash>
 ```
 
-This will remove the label `@movies` to the torrent and movie its data to:
+This will remove the label `@movies` to the torrent and move its data to:
 ```
 Downloads/
 └── torrent-name
@@ -76,7 +76,7 @@ a tag with a prefix is used.
 
 For example, to tag `<torrent-hash>` with *best-of-the-year*:
 ```bash
-tlever.py tag add best-of-the-year <torrent-hash>
+tlever tag add best-of-the-year <torrent-hash>
 ```
 
 This will add the label `#best-of-the-year` to the torrent.
@@ -88,7 +88,7 @@ tlever tag remove best-of-the-year <torrent-hash>
 
 This will remove the label `#best-of-the-year` to the torrent.
 
-> This command *is not* equivalent to `tier.py label ...`
+> This command *is not* equivalent to `tier label ...`
 > as it is *always* prefixed.
 
 ### Tiers
@@ -98,7 +98,7 @@ this is based on [qbitseedmgr](https://github.com/Tomodoro/qbitseedmgr).
 
 To start managing torrents:
 ```bash
-tlever.py tier set
+tlever tier set
 ```
 
 To stop managing torrents:
@@ -108,7 +108,7 @@ tlever tier unset
 
 To resume paused torrents:
 ```bash
-tlever.py tier activate
+tlever tier activate
 ```
 
 To keep the tiers updated and active:
@@ -118,9 +118,30 @@ tlever enforce tier
 
 > The port of `not-popular` is a WIP.
 
+### Clogs
+
+When torrents surpass the last tier they are left unmanaged and if not configured correctly
+they  can start hogging the bandwidth for themselves.
+
+This commands fixes their upload limit to 50KiBps regardless their ratio or longevity.
+
+> This is an experimental feature and many values are currently hardcoded.
+
+To set the clog:
+```bash
+tlever clog set
+```
+
+To unset the clog:
+```bash
+tlever clog unset
+```
+
 ### TUI
 
 Basic terminal interface to show live a torrent stats.
+
+> This is an experimental feature that needs further testing.
 
 For example, given the torrent `<torrent-hash>`:
 ```bash
@@ -130,7 +151,7 @@ tlever tui show <torrent-hash>
 ### Labels
 
 To manage labels without prefixes, useful to fix torrents that have
- invalid categories or tags because of a change on their prefix.
+ invalid categories or tags because of a change in their prefix.
 
 For example, given the prefixes `@` and `#` for categories and tags respectively,
 it's desired to remove the invalid tag `%monthly-release`
@@ -157,7 +178,7 @@ The functions are split into three namespaces:
 The goal is to have a friendly wrapper with proper docstrings
 that is modular and extendable.
 
-If a PR use case is generic enough it is moved into `extra`.
+If a PR use case is generic enough it will be added to `extra`.
 
 ### How to use?
 
