@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from core.client import get_client, get_torrents_list, start_torrent
+from core.client import get_client, get_torrents_list
 from core.torrent import change_upload_throttle
 
 
