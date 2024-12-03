@@ -1,22 +1,15 @@
 #!/usr/bin/env python
 
-import os
-import json
 import logging
 import argparse
 from core.client import get_client
+from core.config import get_config
 from core.label import mk_label, rm_label
 from extra.category import mk_category, rm_category, enforce_categories
 from extra.tag import mk_tag, rm_tag
 from extra.tier import set_tiers, unset_tiers, activate_tiers
 from extra.tui import curses_single
 from extra.clog import set_clog, unset_clog
-
-f = open(os.path.dirname(__file__) + "/../transmission-lever.json")
-
-cfg = json.load(f)
-
-client = get_client(cfg)
 
 # create the top level parser
 parser = argparse.ArgumentParser(
@@ -128,6 +121,10 @@ if args.verbose:
     print(vars(args))
 else:
     logging.basicConfig(level=logging.WARNING)
+
+# parse config file
+cfg = get_config()
+client = get_client(cfg)
 
 if args.subparser_name == 'category':
     if args.action == 'add':
