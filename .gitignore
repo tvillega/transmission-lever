@@ -2,6 +2,6 @@
 .idea/
 transmission-lever.json
 src/__pycache__/
-src/core/__pycache__/
-src/extra/__pycache__/
-src/community/__pycache__/
+src/transmission-lever/core/__pycache__/
+src/transmission-lever/extra/__pycache__/
+src/transmission-lever/community/__pycache__/
