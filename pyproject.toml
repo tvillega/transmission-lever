@@ -21,6 +21,9 @@ dependencies = [
     "transmission-rpc"
 ]
 
+[project.scripts]
+tlever = "transmission_lever.tlever:main"
+
 [project.urls]
 Homepage = "https://github.com/tvillega/transmission-lever"
 Issues = "https://github.com/tvillega/transmission-lever"
