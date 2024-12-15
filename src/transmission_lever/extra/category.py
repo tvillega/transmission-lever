@@ -2,7 +2,7 @@
 
 import os
 
-from transmission_lever.core.label import mk_label, rm_label, find_regex_label
+from transmission_lever.core.label import mk_label, rm_label, fd_regex_label
 from transmission_lever.core.torrent import mv_data, get_rel_download_dir
 from transmission_lever.core.client import get_downloads_dir, get_client, get_torrents_list
 
@@ -34,7 +34,7 @@ def enforce_categories(config: dict) -> None:
         # We get the torrent relative download directory
         rel_torrent_dir = get_rel_download_dir(client, torrent)
         # We check that there is a category label
-        label_exists = find_regex_label(client, torrent.hashString, "@")
+        label_exists = fd_regex_label(client, torrent.hashString, "@")
 
         # If the category label exists
         if label_exists:

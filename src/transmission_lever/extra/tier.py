@@ -1,6 +1,6 @@
 # /usr/bin/env python
 
-from transmission_lever.core.label import find_label, find_regex_label, sw_label, rm_label
+from transmission_lever.core.label import fd_label, fd_regex_label, sw_label, rm_label
 from transmission_lever.core.client import get_client, get_torrents_list, start_torrent
 from transmission_lever.core.torrent import change_upload_throttle
 
@@ -44,7 +44,7 @@ def set_tiers(config: dict) -> None:
     for torrent in get_torrents_list(client):
         ratio = torrent.ratio
         torrent_hash = torrent.hashString
-        free = find_label(client, torrent_hash, prefix+"free")
+        free = fd_label(client, torrent_hash, prefix + "free")
         progress = torrent.progress
 
         # Check if torrent is complete
@@ -91,7 +91,7 @@ def unset_tiers(config: dict) -> None:
 
         for i in range(0, len(tiers)):
             tier_label = prefix_char + "tier-" + str(i)
-            exists = find_label(client, torrent_hash, tier_label)
+            exists = fd_label(client, torrent_hash, tier_label)
 
             if exists:
                 rm_label(client, torrent_hash, tier_label)
@@ -117,7 +117,7 @@ def activate_tiers(config: dict) -> None:
 
         for i in range(0, len(tiers)):
             tier_label = prefix_char + "tier-" + str(i)
-            exists = find_regex_label(client, torrent_hash, tier_label)
+            exists = fd_regex_label(client, torrent_hash, tier_label)
 
             if exists:
                 if torrent.status == 'stopped':

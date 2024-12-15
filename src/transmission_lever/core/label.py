@@ -5,10 +5,10 @@ import logging
 from transmission_rpc import Client
 
 
-def find_label(client: Client,
-               torrent_hash: str,
-               label_name: str,
-               ) -> bool:
+def fd_label(client: Client,
+             torrent_hash: str,
+             label_name: str,
+             ) -> bool:
     """
     Find a label on a torrent object
     :param client: valid transmission session
@@ -28,10 +28,10 @@ def find_label(client: Client,
     return False
 
 
-def find_regex_label(client: Client,
-                     torrent_hash: str,
-                     label_regex: str
-                     ) -> bool:
+def fd_regex_label(client: Client,
+                   torrent_hash: str,
+                   label_regex: str
+                   ) -> bool:
 
     """
     Find a label on a torrent object using regex
@@ -65,7 +65,7 @@ def sw_label(client: Client,
     :return: True on swap, False if old label does not exist
     """
 
-    exists = find_label(client, torrent_hash, old_label_name)
+    exists = fd_label(client, torrent_hash, old_label_name)
 
     if not exists:
         logging.info(
@@ -92,7 +92,7 @@ def mk_label(client: Client,
     :return: True if the label is created, False if it already exists
     """
 
-    exists = find_label(client, torrent_hash, label_name)
+    exists = fd_label(client, torrent_hash, label_name)
 
     if not exists:
         torrent_labels = client.get_torrent(torrent_hash).labels
@@ -118,7 +118,7 @@ def rm_label(client: Client,
     :return: True if the label is removed, False if it does not exist
     """
 
-    exists = find_label(client, torrent_hash, label_name)
+    exists = fd_label(client, torrent_hash, label_name)
 
     if not exists:
         logging.info(
