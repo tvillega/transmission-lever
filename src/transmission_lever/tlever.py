@@ -2,7 +2,6 @@
 
 import logging
 import argparse
-from importlib.metadata import requires
 
 from transmission_lever.core.client import get_client
 from transmission_lever.core.config import get_config
@@ -10,7 +9,6 @@ from transmission_lever.core.label import mk_label, rm_label
 from transmission_lever.extra.category import mk_category, rm_category, enforce_categories
 from transmission_lever.extra.tag import mk_tag, rm_tag
 from transmission_lever.extra.tier import set_tiers, unset_tiers, activate_tiers
-from transmission_lever.extra.tui import curses_single
 from transmission_lever.extra.clog import set_clog, unset_clog
 
 
@@ -193,22 +191,6 @@ def main():
                                help='Alias for set + activate')
 
     ##
-    ## Create sub-parser for 'tui' command
-    ##
-    tui_parser = subparsers.add_parser('tui',
-                                       help='Starts ncurses interface')
-
-    tui_subparsers = tui_parser.add_subparsers(dest='tui_command')
-
-    ###
-    ### Create sub-sub-parser 'tui show' command
-    ###
-    tui_show_parser = tui_subparsers.add_parser('show',
-                                                help='Show live updates of a torrent')
-    tui_show_parser.add_argument('hash',
-                                 help='Hash of the target torrent',)
-
-    ##
     ## Create sub-parser 'clog' command
     ##
     clog_parser = subparsers.add_parser('clog',
@@ -270,15 +252,6 @@ def main():
         elif args.tier_command == 'enforce':
             set_tiers(cfg)
             activate_tiers(cfg)
-
-    elif args.command == 'tui':
-        if args.action == 'show':
-            if args.hash == 'all':
-                print('WIP')
-            elif args.hash == 'tier':
-                print('WIP')
-            else:
-                curses_single(cfg, args.hash)
 
     elif args.command == 'clog':
         if args.action == 'set':
