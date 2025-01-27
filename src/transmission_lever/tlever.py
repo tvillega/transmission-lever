@@ -2,6 +2,8 @@
 
 import logging
 import argparse
+from importlib.metadata import requires
+
 from transmission_lever.core.client import get_client
 from transmission_lever.core.config import get_config
 from transmission_lever.core.label import mk_label, rm_label
@@ -14,106 +16,208 @@ from transmission_lever.extra.clog import set_clog, unset_clog
 
 def main():
 
-    # create the top level parser
+    #
+    # Create main parser
+    #
+    description = 'Simplifies common chores on torrents by wrapping the RPC'
+    epilog      = 'Not all RPC methods are properly documented on upstream'
+
     parser = argparse.ArgumentParser(
-        description='simplifies common chores on torrents by wrapping the RPC',
-        epilog='not all RPC methods are properly documented on upstream')
+        description=description,
+        epilog=epilog)
 
     parser.add_argument('-v', '--verbose',
                         action='store_true',
-                        help='show verbose output')
+                        help='Show verbose output')
 
-    subparsers = parser.add_subparsers(help='modifier on a torrent',
-                                       dest='subparser_name',
+    subparsers = parser.add_subparsers(help='Modifier on a torrent',
+                                       dest='command',
                                        required=True)
 
-    # create the parser for the "category" command
-    subparser_category = subparsers.add_parser('category',
-                                               help='manages categories of torrents')
+    ##
+    ## Create sub-parser for 'category' command
+    ##
+    description = 'Simulates categories with labels and moves the torrent data'
 
-    subparser_category.add_argument('action',
-                                    type=str,
-                                    choices=['add', 'remove'],
-                                    help='action to perform')
+    category_parser = subparsers.add_parser('category',
+                                            description=description,
+                                            help='Manages categories of torrents')
 
-    subparser_category.add_argument('name',
-                                    type=str,
-                                    help='the name of the category')
-    subparser_category.add_argument('hash',
-                                    type=str,
-                                    help='the hash of the torrent')
+    category_subparsers = category_parser.add_subparsers(dest='category_command')
 
-    # create the parser for the "label" command
-    subparser_label = subparsers.add_parser('label',
-                                            help='manages labels of torrents')
+    ###
+    ### Create sub-sub-parser for 'category add' command
+    ###
+    category_add_parser = category_subparsers.add_parser('add',
+                                   help='Add a category to a torrent')
 
-    subparser_label.add_argument('action',
-                                 type=str,
-                                 choices=['add', 'remove'],
-                                 help='action to perform')
+    category_add_parser.add_argument('name',
+                                     type=str,
+                                     help='Name of the category (without prefix)')
 
-    subparser_label.add_argument('name',
-                                 type=str,
-                                 help='the name of the label')
-    subparser_label.add_argument('hash',
-                                 type=str,
-                                 help='the hash of the torrent')
+    category_add_parser.add_argument('hash',
+                                     type=str,
+                                     help='Hash of the target torrent',)
 
-    # create the parser for the "tag" command
-    subparser_tag = subparsers.add_parser('tag',
-                                          help='manages tags of torrents')
+    ###
+    ### Create sub-sub-parser for 'category remove' command
+    ###
+    category_remove_parser = category_subparsers.add_parser('remove',
+                                                            help='Remove a category from a torrent')
 
-    subparser_tag.add_argument('action',
-                               type=str,
-                               choices=['add', 'remove'],
-                               help='action to perform')
+    category_remove_parser.add_argument('name',
+                                        type=str,
+                                        help='Name of the category (without prefix)',)
 
-    subparser_tag.add_argument('name',
-                               type=str,
-                               help='the name of the tag')
-    subparser_tag.add_argument('hash',
-                               type=str,
-                               help='the hash of the torrent')
+    category_remove_parser.add_argument('hash',
+                                        type=str,
+                                        help='Hash of the target torrent',)
 
-    # create the parser for the "tier" command
-    subparser_tier = subparsers.add_parser('tier',
-                                           help='manages upload limit based on ratio')
+    ###
+    ### Create sub-sub-parser for 'category enforce' command
+    ###
+    category_subparsers.add_parser('enforce',
+                                   help='Enforce a category on a torrent')
 
-    subparser_tier.add_argument('action',
+    ##
+    ## Create sub-parser for 'label' command
+    ##
+    description = 'Manages labels without prefixes'
+
+    label_parser = subparsers.add_parser('label',
+                                         description=description,
+                                         help='Manages labels of torrents')
+
+    label_subparsers = label_parser.add_subparsers(dest='category_command')
+
+    ###
+    ### Create sub-sub-parser for 'label add' command
+    ###
+    label_add_parser = label_subparsers.add_parser('add',
+                                                   help='Add a label to a torrent')
+
+    label_add_parser.add_argument('name',
+                                  type=str,
+                                  help='Name of the label',)
+
+    label_add_parser.add_argument('hash',
+                                  type=str,
+                                  help='Hash of the target torrent')
+
+    ###
+    ### Create sub-sub-parser for 'label remove' command
+    ###
+    label_remove_parser = label_subparsers.add_parser('remove',
+                                                   help='Remove a label to a torrent')
+
+    label_remove_parser.add_argument('name',
+                                  type=str,
+                                  help='Name of the label',)
+
+    label_remove_parser.add_argument('hash',
+                                  type=str,
+                                  help='Hash of the target torrent')
+
+    ##
+    ## Create sub-parser for 'tag' command
+    ##
+    description = 'Simulates tags with prefixed labels'
+
+    tag_parser = subparsers.add_parser('tag',
+                                       description=description,
+                                       help='Manages tags of torrents')
+
+    tag_subparsers = tag_parser.add_subparsers(dest='tag_command')
+
+    ###
+    ### Create sub-sub-parser for 'tag add' command
+    ###
+    tag_add_parser = tag_subparsers.add_parser('add',
+                                                   help='Add a tag to a torrent')
+
+    tag_add_parser.add_argument('name',
                                 type=str,
-                                choices=['set', 'unset', 'activate'],
-                                help='action to perform')
+                                help='Name of the tag',)
 
-    # create the parser for the "enforce" command
-    subparser_enforce = subparsers.add_parser('enforce',
-                                              help='enforces a modifier on a torrent')
-
-    subparser_enforce.add_argument('action',
-                                   type=str,
-                                   choices=['category', 'tier'],
-                                   help='modifier to enforce')
-
-    # create the parser for the "tui" command
-    subparser_tui = subparsers.add_parser('tui',
-                                          help='starts ncurses interface')
-
-    subparser_tui.add_argument('action',
-                               type=str,
-                               choices=['show'],
-                               help='action to perform')
-
-    subparser_tui.add_argument('hash',
-                               type=str,
-                               help='the hash of the torrent')
-
-    # create the parser for the "clog" command
-    subparser_clog = subparsers.add_parser('clog',
-                                           help='manages upload limit above tier bounds')
-
-    subparser_clog.add_argument('action',
+    tag_add_parser.add_argument('hash',
                                 type=str,
-                                choices=['set', 'unset'],
-                                help='action to perform')
+                                help='Hash of the target torrent',)
+
+    ###
+    ### Create sub-sub-parser for 'tag remove' command
+    ###
+    tag_remove_parser = tag_subparsers.add_parser('remove',
+                                                   help='Remove a tag to a torrent')
+
+    tag_remove_parser.add_argument('name',
+                                type=str,
+                                help='Name of the tag',)
+
+    tag_remove_parser.add_argument('hash',
+                                type=str,
+                                help='Hash of the target torrent',)
+
+    ##
+    ## Create sub-parser for 'tier' command
+    ##
+    description = 'Enforces upload speed throttle based on ratio using prefixed labels'
+
+    tier_parser = subparsers.add_parser('tier',
+                                        description=description,
+                                        help='Manages upload limit based on ratio')
+
+    tier_subparsers = tier_parser.add_subparsers(dest='tier_command')
+
+    ###
+    ### Create sub-sub-parser for 'tier set' command
+    ###
+    tier_subparsers.add_parser('set',
+                               help='Add tier tags and apply upload limits')
+
+    ###
+    ### Create sub-sub-parser for 'tier unset' command
+    ###
+    tier_subparsers.add_parser('unset',
+                              help='Remove tier tags and reset upload limits')
+
+    ###
+    ### Create sub-sub-parser for 'tier activate'
+    ###
+    tier_subparsers.add_parser('activate',
+                               help='Start tier tagged torrents')
+
+    ###
+    ### Create sub-sub-parser for 'tier enforce'
+    ###
+    tier_subparsers.add_parser('enforce',
+                               help='Alias for set + activate')
+
+    ##
+    ## Create sub-parser for 'tui' command
+    ##
+    tui_parser = subparsers.add_parser('tui',
+                                       help='Starts ncurses interface')
+
+    tui_subparsers = tui_parser.add_subparsers(dest='tui_command')
+
+    ###
+    ### Create sub-sub-parser 'tui show' command
+    ###
+    tui_show_parser = tui_subparsers.add_parser('show',
+                                                help='Show live updates of a torrent')
+    tui_show_parser.add_argument('hash',
+                                 help='Hash of the target torrent',)
+
+    ##
+    ## Create sub-parser 'clog' command
+    ##
+    clog_parser = subparsers.add_parser('clog',
+                                        help='Manages upload limit above tier bounds')
+
+    clog_parser.add_argument('action',
+                             type=str,
+                             choices=['set', 'unset'],
+                             help='Action to perform')
 
     # parse arguments
     args = parser.parse_args()
@@ -129,46 +233,45 @@ def main():
     cfg = get_config()
     client = get_client(cfg)
 
-    if args.subparser_name == 'category':
-        if args.action == 'add':
+    if args.command == 'category':
+        if args.category_command == 'add':
             mk_category(cfg, args.hash, args.name)
 
-        elif args.action == 'remove':
+        elif args.category_command == 'remove':
             rm_category(cfg, args.hash, args.name)
 
-    elif args.subparser_name == 'label':
-        if args.action == 'add':
-            mk_label(client, args.hash, args.name)
-
-        elif args.action == 'remove':
-            rm_label(client, args.hash, args.name)
-
-    elif args.subparser_name == 'tag':
-        if args.action == 'add':
-            mk_tag(cfg, args.hash, args.name)
-
-        elif args.action == 'remove':
-            rm_tag(cfg, args.hash, args.name)
-
-    elif args.subparser_name == 'tier':
-        if args.action == 'set':
-            set_tiers(cfg)
-
-        elif args.action == 'unset':
-            unset_tiers(cfg)
-
-        elif args.action == 'activate':
-            activate_tiers(cfg)
-
-    elif args.subparser_name == 'enforce':
-        if args.action == 'category':
+        elif args.category_command == 'enforce':
             enforce_categories(cfg)
 
-        elif args.action == 'tier':
+    elif args.command == 'label':
+        if args.label_command == 'add':
+            mk_label(client, args.hash, args.name)
+
+        elif args.label_command == 'remove':
+            rm_label(client, args.hash, args.name)
+
+    elif args.command == 'tag':
+        if args.tag_command == 'add':
+            mk_tag(cfg, args.hash, args.name)
+
+        elif args.tag_command == 'remove':
+            rm_tag(cfg, args.hash, args.name)
+
+    elif args.command == 'tier':
+        if args.tier_command == 'set':
+            set_tiers(cfg)
+
+        elif args.tier_command == 'unset':
+            unset_tiers(cfg)
+
+        elif args.tier_command == 'activate':
+            activate_tiers(cfg)
+
+        elif args.tier_command == 'enforce':
             set_tiers(cfg)
             activate_tiers(cfg)
 
-    elif args.subparser_name == 'tui':
+    elif args.command == 'tui':
         if args.action == 'show':
             if args.hash == 'all':
                 print('WIP')
@@ -177,7 +280,7 @@ def main():
             else:
                 curses_single(cfg, args.hash)
 
-    elif args.subparser_name == 'clog':
+    elif args.command == 'clog':
         if args.action == 'set':
             set_clog(cfg)
 
